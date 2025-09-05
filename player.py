@@ -4,10 +4,16 @@ import math
 from entity import Entity
 
 class Player(Entity):
-    def __init__(self, x, y, width, height, color, speed, colliding_tiles=[]):
-        super().__init__(x, y, width, height, color, colliding_tiles)
+    def __init__(self, pos, width, height, color, speed, colliding_tiles=[], hidding_tiles=[]):
+        super().__init__(pos, width, height, color, colliding_tiles, hidding_tiles)
         self.speed = speed
-        self.angle = 0
+
+    def update(self):
+        super().update()
+        dx, dy = self.handle_input(pygame.key.get_pressed())
+        self.move(dx, dy)
+        
+        self.rotate(self.update_angle_to_mouse())
 
     def handle_input(self, keys):
         dx, dy = 0, 0
@@ -19,6 +25,12 @@ class Player(Entity):
             dy -= self.speed
         if keys[pygame.K_DOWN]:
             dy += self.speed
+            
+        if dx != 0 or dy != 0:
+            length = math.hypot(dx, dy)
+            dx = dx / length * self.speed
+            dy = dy / length * self.speed
+
         return dx, dy
 
     def update_angle_to_mouse(self):
@@ -26,4 +38,4 @@ class Player(Entity):
         player_center = self.rect.center
         dx = mouse_x - player_center[0]
         dy = mouse_y - player_center[1]
-        self.angle = math.degrees(math.atan2(-dy, dx))  # -dy car pygame y va vers le bas
+        return math.degrees(math.atan2(-dy, dx))
